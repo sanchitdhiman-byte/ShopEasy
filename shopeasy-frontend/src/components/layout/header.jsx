@@ -1,26 +1,26 @@
+import {useEffect, useRef, useState} from "react";
+import {Link} from "react-router-dom";
 import shopEasyLogoDark from "../../assets/shopeasy-name-only-dark.png";
 import shopEasyLogoLight from "../../assets/shopeasy-name-only-light.png";
 import {useDarkMode} from "../../hooks/useDarkMode.jsx";
 import {useAuth} from "../../context/authContext.jsx";
-import {useEffect, useRef, useState} from "react";
 import {useSearch} from "../../hooks/useSearch.jsx";
-import {Link} from "react-router-dom";
 
 function Header() {
-    const {isDark, toggleDarkMode} = useDarkMode();
-    const {user, logout} = useAuth();
+    const { isDark, toggleDarkMode } = useDarkMode();
+    const { user, logout } = useAuth();
     const { results, loading, search} = useSearch();
 
     const [query, setQuery] = useState("");
+    const [isSearchDropdown, setIsSearchDropdown] = useState(false);
+    const searchRef = useRef(null);
+
     useEffect(() => {
         if (query.trim()) {
             const timeout = setTimeout(() => search(query), 300);
             return () => clearTimeout(timeout);
         }
     }, [query, search]);
-
-    const [isSearchDropdown, setIsSearchDropdown] = useState(false);
-    const searchRef = useRef(null);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -37,10 +37,10 @@ function Header() {
 
     return (
         <header className={`flex items-center justify-between px-8 py-3 ${
-            isDark ? "bg-blue-950 text-white" : "bg-white text-gray-900"
-        } shadow-lg fixed top-0 left-0 right-0 z-50 transition-colors duration-300`}>
+                    isDark ? "bg-blue-950 text-white" : "bg-white text-gray-900"
+                } shadow-lg fixed top-0 left-0 right-0 z-50 transition-colors duration-300`}>
             <div className="flex items-center flex-shrink-0">
-                <Link to="/public">
+                <Link to="/">
                     <img src={isDark ? shopEasyLogoDark : shopEasyLogoLight}
                          alt="ShopEasy Logo"
                          className="h-10 w-auto hover:scale-105 transition-transform"
@@ -48,10 +48,10 @@ function Header() {
                 </Link>
             </div>
 
-            <div className={`relative flex items-center w-1/2 max-w-lg px-4 py-2 rounded-full ${
-                    isDark ? "border-gray-700 bg-blue-900/80" : "border-gray-300 bg-gray-200"
-                } transition`}
-                 ref={searchRef}>
+            <div ref={searchRef}
+                 className={`relative flex items-center w-1/2 max-w-lg px-4 py-2 rounded-full ${
+                     isDark ? "border-gray-700 bg-blue-900/80" : "border-gray-300 bg-gray-200"
+                 } transition`}>
                 <input type="text"
                        placeholder="Search"
                        value={query}
@@ -62,8 +62,8 @@ function Header() {
                        }`}
                 />
                 <span className={`material-symbols-rounded text-xl select-none ${
-                    isDark ? "text-gray-400" : "text-gray-500"
-                }`}>
+                            isDark ? "text-gray-400" : "text-gray-500"
+                        }`}>
                     search
                 </span>
 
@@ -71,35 +71,36 @@ function Header() {
                     <div className={`absolute top-full left-0 mt-2 w-full rounded-lg shadow-lg ${
                             isDark ? "bg-blue-900 text-white" : "bg-white text-gray-900"
                         } transition-all duration-300 ease-in-out`}>
-                        { loading ? (
+                        { loading ?
+                            (
                                 <div className="p-4 text-sm opacity-70">Searching...</div>
                             ) : (
-                            <>
-                                <div key="products" className="p-2">
-                                    <h5 className="text-xs font-semibold uppercase opacity-70">Products</h5>
-                                    <div className="mt-1 flex flex-col gap-1">
-                                        {results?.products?.length > 0 ? (
-                                            results.products.map((product) => (
-
-                                                <Link key={product.productId}
-                                                   to={`/product/${product.productId}`}
-                                                   className={`block px-2 py-1 rounded ${
-                                                       isDark ? "hover:bg-blue-800" : "hover:bg-gray-100"
-                                                   }`}
-                                                   onClick={() => {
-                                                       setIsSearchDropdown(false);
-                                                       setQuery(product.productName);
-                                                   }}>
-                                                    {product.productName}
-                                                </Link>
-                                            ))
-                                        ) : (
-                                            <div className="text-sm opacity-70">No products found</div>
-                                        )}
+                                <>
+                                    <div key="products" className="p-2">
+                                        <h5 className="text-xs font-semibold uppercase opacity-70">Products</h5>
+                                        <div className="mt-1 flex flex-col gap-1">
+                                            {results?.products?.length > 0 ?
+                                                (
+                                                    results.products.map((product) => (
+                                                        <Link key={product.productId}
+                                                              to={`/product/${product.productId}`}
+                                                              className={`block px-2 py-1 rounded ${
+                                                                  isDark ? "hover:bg-blue-800" : "hover:bg-gray-100"
+                                                              }`}
+                                                              onClick={() => {
+                                                                  setIsSearchDropdown(false);
+                                                                  setQuery(product.productName);
+                                                              }}>
+                                                            {product.productName}
+                                                        </Link>
+                                                    ))
+                                                ) : (
+                                                    <div className="text-sm opacity-70">No products found</div>
+                                                )
+                                            }
                                     </div>
                                 </div>
 
-                                {/* Categories */}
                                 <div key="categories" className="p-2 border-t border-gray-300/20">
                                     <h5 className="text-xs font-semibold uppercase opacity-70">Categories</h5>
                                     <div className="mt-1 flex flex-col gap-1">
