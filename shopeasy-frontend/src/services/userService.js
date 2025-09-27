@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const getAllCategories = async () => {
+export const getOwnProfile = async () => {
     try {
-        const response = await api.get("/categories/");
+        const response = await api.get("/users/me");
         return { success: true, data: response.data };
     } catch (error) {
         return {
@@ -12,9 +12,9 @@ export const getAllCategories = async () => {
     }
 };
 
-export const getCategoryById = async (categoryId) => {
+export const updateProfile = async (payload) => {
     try {
-        const response = await api.get(`/categories/${categoryId}`);
+        const response = await api.put("/users/me", payload);
         return { success: true, data: response.data };
     } catch (error) {
         return {
@@ -24,9 +24,9 @@ export const getCategoryById = async (categoryId) => {
     }
 };
 
-export const createCategory = async (payload) => {
+export const getUserById = async (userId) => {
     try {
-        const response = await api.post("/categories/", payload);
+        const response = await api.get(`/users/${userId}`);
         return { success: true, data: response.data };
     } catch (error) {
         return {
@@ -36,9 +36,9 @@ export const createCategory = async (payload) => {
     }
 };
 
-export const updateCategory = async (categoryId, payload) => {
+export const getUsersByRole = async (role) => {
     try {
-        const response = await api.put(`/categories/${categoryId}/`, payload);
+        const response = await api.get("/users/", { params: { role } });
         return { success: true, data: response.data };
     } catch (error) {
         return {
@@ -48,9 +48,9 @@ export const updateCategory = async (categoryId, payload) => {
     }
 };
 
-export const deleteCategory = async (categoryId) => {
+export const deleteUser = async (userId) => {
     try {
-        const response = await api.delete(`/categories/${categoryId}/`);
+        const response = await api.delete(`/users/${userId}`);
         return { success: true, data: response.data };
     } catch (error) {
         return {
@@ -60,21 +60,9 @@ export const deleteCategory = async (categoryId) => {
     }
 };
 
-export const getProductsByCategory = async (categoryId) => {
+export const getReviewsByUser = async (userId) => {
     try {
-        const response = await api.get(`/categories/${categoryId}/products/`);
-        return { success: true, data: response.data };
-    } catch (error) {
-        return {
-            success: false,
-            error: error.response?.data?.message || error.message,
-        };
-    }
-};
-
-export const getChildCategories = async (categoryId) => {
-    try {
-        const response = await api.get(`/categories/${categoryId}/subcategories/`);
+        const response = await api.get(`/users/${userId}/reviews/`);
         return { success: true, data: response.data };
     } catch (error) {
         return {

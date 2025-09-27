@@ -3,14 +3,15 @@ import shopEasyLogoLight from "../assets/shopeasy_logo-no-bg.png"
 import { useDarkMode } from "../hooks/useDarkMode.jsx";
 import "../index.css"
 import {registerUser} from "../services/authService.js";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useAuth} from "../context/authContext.jsx";
-import {Link} from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
 
 function Register() {
     const { isDark, toggleDarkMode } = useDarkMode();
 
-    const { login } = useAuth();
+    const { login, user } = useAuth();
+    const navigate = useNavigate();
 
     const [form, setForm] = useState({
         name: "",
@@ -22,6 +23,13 @@ function Register() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token && user) {
+            navigate("/");
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -160,7 +168,7 @@ function Register() {
             </div>
 
             <div>
-                <button className={`fixed top-5 right-5 flex items-center justify-center ${isDark ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-300 hover:bg-gray-400"} w-10 h-10 rounded-full shadow-lg transition-all duration-200`}
+                <button className={`fixed top-5 right-5 flex items-center justify-center ${isDark ? "bg-gray-700 hover:bg-gray-600" : "hover:bg-gray-400"} w-10 h-10 rounded-full shadow-[0_0_10px_2px_rgba(0,0,0,0.3)] transition-all duration-200`}
                         onClick={toggleDarkMode}
                         aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}>
                     <span className={`material-symbols-rounded ${isDark ? "text-white" : "text-gray-900"} text-lg select-none`}>
