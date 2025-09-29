@@ -59,3 +59,15 @@ export const clearCartItems = async () => {
         };
     }
 };
+
+export const mergeGuestCart = async (payload) => {
+    try {
+        const response = await api.post("/cart/merge", payload);
+        return { success: true, data: response.data };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.response?.data?.message || error.message,
+        };
+    }
+};

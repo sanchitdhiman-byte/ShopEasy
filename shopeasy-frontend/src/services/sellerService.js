@@ -11,3 +11,15 @@ export const getProductsBySellerId = async (sellerId) => {
         };
     }
 };
+
+export const getDashboardData = async () => {
+    try {
+        const response = await api.get("/seller/dashboard");
+        return { success: true, data: response.data };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.response?.data?.message || error.message,
+        };
+    }
+}

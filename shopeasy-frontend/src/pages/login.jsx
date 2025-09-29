@@ -22,8 +22,10 @@ function Login() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token && user) {
+        if (token && user && user.role === "BUYER") {
             navigate("/");
+        } else if (token && user && user.role === "SELLER") {
+            navigate("/seller/dashboard");
         }
     }, [user, navigate]);
 
@@ -54,6 +56,7 @@ function Login() {
                 role: form.accountType.toUpperCase(),
             };
             const response = await loginUser(payload);
+            console.log(response.data.role);
             if (!response.success) {
                 throw new Error("Invalid Credentials");
             }
@@ -67,12 +70,22 @@ function Login() {
                     role: response.data.role,
                 },
             });
+
             setForm({
                 email: "",
                 password: "",
                 accountType: "BUYER",
             });
-            navigate("/");
+
+            if (response.data.role === "SELLER") {
+                console.log("Successfully logged in!");
+                navigate("/seller/dashboard");
+                console.log("Successfully logged in! 3");
+            } else {
+                console.log("Successfully logged in 2!");
+                navigate("/");
+            }
+
         } catch (err) {
             setError(err.message || "Login failed. Try again.");
         } finally {

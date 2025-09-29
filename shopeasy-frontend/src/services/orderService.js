@@ -59,3 +59,8 @@ export const cancelOrder = async (orderId) => {
         };
     }
 };
+
+export const getAllOrders = async () => {
+    const { data } = await api.get(`/admin/orders/`);
+    return data;
+};

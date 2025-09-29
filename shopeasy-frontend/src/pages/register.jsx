@@ -64,19 +64,25 @@ function Register() {
                 password: form.password,
             };
 
-            const data = await registerUser(payload);
+            const res = await registerUser(payload);
 
-            login({
-                token: data.token,
-                user: {
-                    userId: data.userId,
-                    name: data.name,
-                    email: data.email,
-                    role: data.role,
-                },
-            });
+            if (res.success) {
+                const { token, userId, name, email, role } = res.data;
 
-            window.location.href = "/";
+                login({
+                    token,
+                    user: {
+                        userId,
+                        name,
+                        email,
+                        role,
+                    },
+                });
+
+                window.location.href = "/";
+            } else {
+                setError(res.error || "Registration failed");
+            }
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed");
         } finally {

@@ -2,13 +2,15 @@ import {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 import shopEasyLogoDark from "../../assets/shopeasy-name-only-dark.png";
 import shopEasyLogoLight from "../../assets/shopeasy-name-only-light.png";
-import {useDarkMode} from "../../hooks/useDarkMode.jsx";
+import {useDarkMode} from "../../context/themeContext.jsx";
 import {useAuth} from "../../context/authContext.jsx";
 import {useSearch} from "../../hooks/useSearch.jsx";
+import {useCart} from "../../context/cartContext.jsx";
 
 function Header() {
     const { isDark, toggleDarkMode } = useDarkMode();
     const { user, logout } = useAuth();
+    const { cart } = useCart();
     const { results, loading, search} = useSearch();
 
     const [query, setQuery] = useState("");
@@ -40,7 +42,7 @@ function Header() {
                     isDark ? "bg-blue-950 text-white" : "bg-white text-gray-900"
                 } shadow-lg fixed top-0 left-0 right-0 z-50 transition-colors duration-300`}>
             <div className="flex items-center flex-shrink-0">
-                <Link to="/">
+                <Link to={ (user && user.role === "SELLER") ? "/seller/dashboard" : "/" }>
                     <img src={isDark ? shopEasyLogoDark : shopEasyLogoLight}
                          alt="ShopEasy Logo"
                          className="h-10 w-auto hover:scale-105 transition-transform"
@@ -139,6 +141,20 @@ function Header() {
                         {isDark ? "light_mode" : "dark_mode"}
                     </span>
                 </button>
+
+                {(user?.role === "BUYER" || !user) && (
+                    <Link to="/cart"
+                          className={`flex w-10 h-10 items-center justify-center gap-2 px-3 py-2 rounded-full font-medium ${
+                              isDark
+                                  ? "bg-blue-900/70 hover:bg-indigo-800 text-white"
+                                  : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                          } transition`}>
+                                <span className="material-symbols-rounded text-xl items-center justify-center">
+                                    shopping_cart
+                                </span>
+                    </Link>
+                )}
+
                 {user ?
                     (
                         <div className="flex items-center gap-1.5">
@@ -165,7 +181,7 @@ function Header() {
                         </div>
                     ) : (
                         <Link to="/login"
-                           className={`flex items-center gap-2 px-3 py-2 rounded-full font-medium ${
+                           className={`flex items-center justify-center gap-2 px-3 py-2 rounded-full font-medium ${
                                isDark
                                    ? "bg-blue-900/70 hover:bg-indigo-800 text-white"
                                    : "bg-blue-600 hover:bg-blue-500 text-white"
