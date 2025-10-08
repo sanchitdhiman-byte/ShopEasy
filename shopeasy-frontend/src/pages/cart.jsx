@@ -14,12 +14,13 @@ function Cart() {
     }, [cart]);
 
     const increment = (item) => {
-        addToCart({ ...item, quantity: 1 }); // add 1 more
+        addToCart({ ...item, quantity: 1 });
     };
+
 
     const decrement = (item) => {
         if (item.quantity > 1) {
-            addToCart({ ...item, quantity: -1 }); // subtract 1
+            addToCart({ ...item, quantity: -1 });
         } else {
             removeFromCart(item.productId);
         }

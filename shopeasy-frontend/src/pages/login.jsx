@@ -78,11 +78,8 @@ function Login() {
             });
 
             if (response.data.role === "SELLER") {
-                console.log("Successfully logged in!");
                 navigate("/seller/dashboard");
-                console.log("Successfully logged in! 3");
             } else {
-                console.log("Successfully logged in 2!");
                 navigate("/");
             }
 

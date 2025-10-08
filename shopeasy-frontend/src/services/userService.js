@@ -2,7 +2,7 @@ import api from "./api";
 
 export const getOwnProfile = async () => {
     try {
-        const response = await api.get("/users/me");
+        const response = await api.get("/user/me");
         return { success: true, data: response.data };
     } catch (error) {
         return {

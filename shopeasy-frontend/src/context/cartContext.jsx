@@ -52,7 +52,6 @@ export function CartProvider({ children }) {
             }
         });
 
-        // For logged-in BUYER, call backend as before
         if (user?.role === "BUYER") {
             fetch("/api/cart/add", {
                 method: "POST",

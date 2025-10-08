@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import {useDarkMode} from "../context/themeContext.jsx";
 import { getAllProducts } from "../services/productService.js";
 import { getAllCategories } from "../services/categoryService.js";
-import { useCart } from "../context/cartContext.jsx";
 import { Link } from "react-router-dom";
 import Header from "../components/layout/header.jsx";
 import phoneImage from '../assets/phone.png'
+import AddToCart from "../components/addToCart.jsx";
 
 function Homepage() {
     const { isDark } = useDarkMode();
@@ -13,7 +13,6 @@ function Homepage() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -22,11 +21,6 @@ function Homepage() {
                     getAllCategories(),
                     getAllProducts(),
                 ]);
-
-                console.log("Categories Response:", catRes);
-                console.log("Products Response:", prodRes);
-
-                console.log("Products Response Data:", prodRes.data);
 
                 if (catRes.success) {
                     setCategories(catRes.data || []);
@@ -139,14 +133,13 @@ function Homepage() {
                                         <p className="text-sm mb-3 opacity-70">
                                             {prod.description || "No description available."}
                                         </p>
-                                        <button className={`w-full py-2 rounded-lg font-semibold transition ${
-                                            isDark
-                                                ? "bg-purple-600 hover:bg-purple-700 text-white"
-                                                : "bg-blue-600 hover:bg-blue-500 text-white"
-                                            }`}
-                                                onClick={() => addToCart(prod)}>
-                                            Add to Cart
-                                        </button>
+                                        <AddToCart
+                                            productId={prod.productId}
+                                            onAddToCart={(cart) => {
+                                                console.log("Cart updated:", cart);
+                                            }}
+                                            classes={`w-full py-2 rounded-lg font-semibold transition ${ isDark ? "bg-purple-600 hover:bg-purple-700 text-white" : "bg-blue-600 hover:bg-blue-500 text-white" }`}
+                                        />
                                     </div>
                                 </Link>
                             ))

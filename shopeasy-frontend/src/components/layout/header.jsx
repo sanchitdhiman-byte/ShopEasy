@@ -6,6 +6,7 @@ import {useDarkMode} from "../../context/themeContext.jsx";
 import {useAuth} from "../../context/authContext.jsx";
 import {useSearch} from "../../hooks/useSearch.jsx";
 import {useCart} from "../../context/cartContext.jsx";
+import {address} from "framer-motion/m";
 
 function Header() {
     const { isDark, toggleDarkMode } = useDarkMode();

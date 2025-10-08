@@ -24,9 +24,9 @@ export const loginUser = async (payload) => {
     }
 };
 
-export const logoutUser = async () => {
+export const logoutUser = async (token) => {
     try {
-        const response = await api.post("/auth/logout");
+        const response = await api.post("/auth/logout", {}, { headers: { Authorization: `Bearer ${token}`}});
         return { success: true, data: response.data };
     } catch (error) {
         return {

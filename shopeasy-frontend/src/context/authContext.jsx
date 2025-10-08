@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { mergeGuestCart } from "../services/shoppingCartService.js";
+import { logoutUser } from "../services/authService.js"
 
 const AuthContext = createContext(null);
 
@@ -27,12 +28,14 @@ export const AuthProvider = ({ children }) => {
         if (guestCart.length > 0 && data.user.role === "BUYER") {
             const res = await mergeGuestCart(guestCart);
             if (res.success) {
-                localStorage.removeItem("guestCart"); // clear after merge
+                localStorage.removeItem("guestCart");
             }
         }
     };
 
     const logout = () => {
+        const token = localStorage.getItem("token");
+        logoutUser(token);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setToken(null);
