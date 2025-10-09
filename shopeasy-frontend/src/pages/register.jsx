@@ -81,7 +81,8 @@ function Register() {
 
                 window.location.href = "/";
             } else {
-                setError(res.error || "Registration failed");
+                console.log(res.error.response.data.message);
+                setError(res.error.response.data.message || "Registration failed");
             }
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed");

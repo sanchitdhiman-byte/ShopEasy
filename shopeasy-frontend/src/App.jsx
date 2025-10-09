@@ -1,5 +1,4 @@
 import './App.css'
-import Header from "./components/layout/header.jsx";
 import "./hooks/useDarkMode.jsx"
 import Homepage from "./pages/homepage.jsx";
 import {Route, Routes} from "react-router-dom";
@@ -16,6 +15,7 @@ import Profile from "./pages/profile.jsx";
 import Categories from "./pages/categories.jsx";
 import Product from "./pages/product.jsx";
 import Category from "./pages/category.jsx";
+import AddProduct from "./pages/seller/addProduct.jsx";
 
 function App() {
     return (
@@ -33,6 +33,7 @@ function App() {
                     <Route path="products" element={<Products />} />
                     <Route path="orders" element={<Orders />} />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="products/add/" element={<AddProduct />} />
                 </Route>
                 <Route path={"/cart"} element={<Cart />} />
                 <Route path={"/profile"} element={<Profile />} />

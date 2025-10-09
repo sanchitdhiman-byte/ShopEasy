@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllProducts, deleteProduct } from "../../services/productService.js";
+import { addProduct } from "../../services/sellerService.js";
 import { useDarkMode } from "../../context/themeContext.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -35,7 +36,7 @@ function Products() {
     if (loading) return <p className="text-center mt-10">Loading products...</p>;
 
     return (
-        <div className={`min-h-screen pt-6 px-6 sm:px-10 lg:px-12 transition-colors duration-300 ${
+        <div className={`min-h-screen pt-2 px-6 sm:px-10 lg:px-12 transition-colors duration-300 ${
             isDark
                 ? "bg-gradient-to-br from-gray-900 via-blue-950 to-black text-white"
                 : "bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900"
