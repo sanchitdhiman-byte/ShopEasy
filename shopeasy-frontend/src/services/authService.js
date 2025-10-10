@@ -19,7 +19,7 @@ export const loginUser = async (payload) => {
     } catch (error) {
         return {
             success: false,
-            error: error.response?.data?.message || error.message,
+            error: error.response?.data?.error.substring(22),
         };
     }
 };

@@ -54,16 +54,31 @@ export default function AddProduct() {
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
-        if (name === "images") setImages([...files]);
-        else if (name === "videos") setVideos([...files]);
+        const filesArray = Array.from(files);
+
+        if (name === "images") setImages((prev) => [...prev, ...filesArray]);
+        else if (name === "videos") setVideos((prev) => [...prev, ...filesArray]);
+
+        e.target.value = null;
     };
+
 
     const handleDrop = (e, type) => {
         e.preventDefault();
         setDragOver(null);
         const files = Array.from(e.dataTransfer.files);
-        if (type === "images") setImages(files);
-        else setVideos(files);
+
+        if (type === "images") setImages((prev) => [...prev, ...files]);
+        else setVideos((prev) => [...prev, ...files]);
+    };
+
+
+    const removeImage = (index) => {
+        setImages(images.filter((_, i) => i !== index));
+    };
+
+    const removeVideo = (index) => {
+        setVideos(videos.filter((_, i) => i !== index));
     };
 
     const handleAddCategory = async () => {
@@ -309,10 +324,18 @@ export default function AddProduct() {
                             {images.length > 0 && (
                                 <div className="mt-4 flex flex-wrap gap-3 justify-center">
                                     {images.map((img, i) => (
-                                        <img key={i}
-                                             src={URL.createObjectURL(img)}
-                                             alt=""
-                                             className="w-20 h-20 object-cover rounded-lg border" />
+                                        <div key={i} className="relative group">
+                                            <img
+                                                src={URL.createObjectURL(img)}
+                                                alt=""
+                                                className="w-20 h-20 object-cover rounded-lg border"
+                                            />
+                                            <button type="button"
+                                                    onClick={() => removeImage(i)}
+                                                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 text-[0.5px] opacity-0 group-hover:opacity-100">
+                                                <span className={"material-symbols-rounded text-[0.5px]"}>close</span>
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -340,10 +363,14 @@ export default function AddProduct() {
                             {videos.length > 0 && (
                                 <div className="mt-4 flex flex-wrap gap-3 justify-center">
                                     {videos.map((vid, i) => (
-                                        <video key={i}
-                                               src={URL.createObjectURL(vid)}
-                                               controls
-                                               className="w-24 h-20 rounded-lg border" />
+                                        <div key={i} className="relative group">
+                                            <video src={URL.createObjectURL(vid)} controls className="w-24 h-20 rounded-lg border" />
+                                            <button type="button"
+                                                    onClick={() => removeVideo(i)}
+                                                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 text-[0.5px] opacity-0 group-hover:opacity-100">
+                                                <span className={"material-symbols-rounded text-[0.5px]"}>close</span>
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                             )}

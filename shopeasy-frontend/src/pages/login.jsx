@@ -56,7 +56,6 @@ function Login() {
                 role: form.accountType.toUpperCase(),
             };
             const response = await loginUser(payload);
-            console.log(response.data.role);
             if (!response.success) {
                 throw new Error("Invalid Credentials");
             }
@@ -141,7 +140,7 @@ function Login() {
                             arrow_drop_down
                         </span>
                     </div>
-                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                    {error && <div className={"flex items-center justify-center"}><p className="text-red-500 text-sm">{error}</p></div>}
                     <button type="submit"
                             disabled={loading}
                             className={`w-full py-3 mt-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg shadow-lg transition-transform transform hover:scale-103 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center`}>
