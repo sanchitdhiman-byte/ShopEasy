@@ -60,7 +60,7 @@ function Products() {
                         <div key={product.productId} className={`rounded-2xl shadow-lg overflow-hidden flex flex-col transition-transform transform hover:scale-105 hover:shadow-xl ${
                             isDark ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-200"
                         }`}>
-                            <img src={product.imageUrl} alt={product.productName} className="h-48 w-full object-cover" />
+                            <img src={`../shopeasy-backend/${product.imageUrl}`} alt={product.productName} className="h-48 w-full object-cover" />
                             <div className="p-4 flex flex-col flex-grow">
                                 <h2 className="font-semibold text-lg mb-2">{product.productName}</h2>
                                 {product.description && <p className={`text-sm mb-3 opacity-70 ${isDark ? "text-gray-300" : "text-gray-600"}`}>{product.description.slice(0, 60)}...</p>}

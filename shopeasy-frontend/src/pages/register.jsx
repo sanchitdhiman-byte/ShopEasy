@@ -26,8 +26,10 @@ function Register() {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token && user) {
+        if (token && user && user.role === "BUYER") {
             navigate("/");
+        } else if (token && user && user.role === "SELLER") {
+            navigate("/seller/dashboard");
         }
     }, [user, navigate]);
 
@@ -79,7 +81,11 @@ function Register() {
                     },
                 });
 
-                window.location.href = "/";
+                if (res.data.role === "SELLER") {
+                    navigate("/seller/dashboard");
+                } else if (res.data.role === "BUYER") {
+                    navigate("/");
+                }
             } else {
                 console.log(res.error.response.data.message);
                 setError(res.error.response.data.message || "Registration failed");

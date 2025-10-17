@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { useDarkMode } from "../../context/themeContext.jsx";
 import { getAllCategories, createCategory } from "../../services/categoryService.js";
 import api from "../../services/api.js";
@@ -22,12 +22,43 @@ export default function AddProduct() {
     const [videos, setVideos] = useState([]);
     const [dragOver, setDragOver] = useState(null);
     const [showCategoryForm, setShowCategoryForm] = useState(false);
-    const [newCategory, setNewCategory] = useState({ categoryName: "", description: "" });
+    const [newCategory, setNewCategory] = useState({ categoryName: "", description: "", parentCategoryId: "" });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
 
+    const [filteredParentCategories, setFilteredParentCategories] = useState([]);
+    const [parentSearch, setParentSearch] = useState("");
+    const [isParentDropdownOpen, setIsParentDropdownOpen] = useState(false);
+
+    const dropdownRef = useRef(null);
+    const parentDropdownRef = useRef(null);
+
     useEffect(() => {
         fetchCategories();
+
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setIsDropdownOpen(false);
+            }
+            if (parentDropdownRef.current && !parentDropdownRef.current.contains(e.target)) {
+                setIsParentDropdownOpen(false);
+            }
+        };
+
+        const handleEscape = (e) => {
+            if (e.key === "Escape") {
+                setIsDropdownOpen(false);
+                setIsParentDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("click", handleClickOutside);
+        document.addEventListener("keydown", handleEscape);
+
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+            document.removeEventListener("keydown", handleEscape);
+        };
     }, []);
 
     const fetchCategories = async () => {
@@ -35,6 +66,7 @@ export default function AddProduct() {
             const response = await getAllCategories();
             setCategories(response.data);
             setFilteredCategories(response.data);
+            setFilteredParentCategories(response.data);
         } catch (err) {
             console.error("Error fetching categories:", err);
         }
@@ -48,9 +80,20 @@ export default function AddProduct() {
         );
     };
 
+    const handleParentSearch = (e) => {
+        const value = e.target.value;
+        setParentSearch(value);
+        setFilteredParentCategories(
+            categories.filter((c) =>
+                c.categoryName.toLowerCase().includes(value.toLowerCase())
+            )
+        );
+    };
+
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-    const handleNewCategoryChange = (e) =>
+    const handleNewCategoryChange = (e) => {
         setNewCategory({ ...newCategory, [e.target.name]: e.target.value });
+    };
 
     const handleFileChange = (e) => {
         const { name, files } = e.target;
@@ -82,25 +125,28 @@ export default function AddProduct() {
     };
 
     const handleAddCategory = async () => {
-        if (!newCategory.categoryName.trim()) {
-            setMessage({ type: "error", text: "Category name cannot be blank." });
-            return;
-        }
+        if (!newCategory.categoryName.trim()) return alert("Category name cannot be blank.");
 
         try {
-            const created = await createCategory(newCategory);
+            const created = await createCategory({
+                categoryName: newCategory.categoryName,
+                description: newCategory.description,
+                parentCategoryId: newCategory.parentCategoryId || null,
+            });
+
             setCategories((prev) => [...prev, created]);
             setFilteredCategories((prev) => [...prev, created]);
+
             setForm({ ...form, categoryId: created.categoryId });
             setSearch(created.categoryName);
+
+            setNewCategory({ categoryName: "", description: "", parentCategoryId: "" });
+            setParentSearch("");
             setShowCategoryForm(false);
-            setNewCategory({ categoryName: "", description: "" });
-            setMessage({ type: "success", text: "Category created successfully." });
+            alert("Category created successfully!");
         } catch (err) {
-            setMessage({
-                type: "error",
-                text: err.response?.data?.message || "Failed to create category.",
-            });
+            console.error("Failed to create category:", err);
+            alert(err.response?.data?.message || "Failed to create category.");
         }
     };
 
@@ -215,29 +261,31 @@ export default function AddProduct() {
                                className={inputClass} />
                     </div>
 
-                    <div className="relative">
-                        <input type="text"
-                               value={
-                                    form.categoryId
-                                        ? categories.find((c) => c.categoryId === form.categoryId)
-                                        ?.categoryName || ""
-                                        : search
-                               }
-                               onChange={handleSearch}
-                               onFocus={() => setIsDropdownOpen(true)}
-                               placeholder="Search or select category"
-                               className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
-                                   isDark 
-                                       ? "bg-gray-800 border-gray-700 text-white" 
-                                       : "bg-gray-100 border-gray-300 text-gray-900"
-                               }`} />
+                    <div className="relative" ref={dropdownRef}>
+                        <input
+                            type="text"
+                            value={
+                                form.categoryId
+                                    ? categories.find((c) => c.categoryId === form.categoryId)?.categoryName || ""
+                                    : search
+                            }
+                            onChange={handleSearch}
+                            onFocus={() => setIsDropdownOpen(true)}
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            placeholder="Search or select category"
+                            className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
+                                isDark
+                                    ? "bg-gray-800 border-gray-700 text-white"
+                                    : "bg-gray-100 border-gray-300 text-gray-900"
+                            }`}
+                        />
 
                         {isDropdownOpen && (
-                            <div className={`absolute z-10 w-full mt-2 rounded-xl shadow-lg max-h-56 overflow-y-auto ${
-                                isDark
-                                    ? "bg-gray-800 border border-gray-700"
-                                    : "bg-white border border-gray-300"
-                                }`}>
+                            <div
+                                className={`absolute z-10 w-full mt-2 rounded-xl shadow-lg max-h-56 overflow-y-auto ${
+                                    isDark ? "bg-gray-800 border border-gray-700" : "bg-white border border-gray-300"
+                                }`}
+                            >
                                 {filteredCategories.length > 0 ? (
                                     filteredCategories.map((cat) => (
                                         <div
@@ -259,47 +307,116 @@ export default function AddProduct() {
                                 )}
                             </div>
                         )}
-                    </div>
 
-                    <div className="flex justify-end">
-                        <button type="button"
+                        {/* ✅ Button to create new category */}
+                        <div className="flex justify-end mt-2">
+                            <button
+                                type="button"
                                 onClick={() => setShowCategoryForm(!showCategoryForm)}
-                                className="text-orange-500 font-semibold hover:underline">
-                            + {showCategoryForm ? "Cancel New Category" : "Create New Category"}
-                        </button>
-                    </div>
-
-                    {showCategoryForm && (
-                        <div className={`p-4 rounded-xl border ${
-                            isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"
-                        }`}>
-                            <input type="text"
-                                   name="categoryName"
-                                   placeholder="Category Name"
-                                   value={newCategory.categoryName}
-                                   onChange={handleNewCategoryChange}
-                                   className={`w-full mb-3 px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
-                                       isDark
-                                           ? "bg-gray-900 border-gray-700 text-white"
-                                           : "bg-white border-gray-300 text-gray-900"
-                                   }`} />
-                            <textarea name="description"
-                                      rows="2"
-                                      placeholder="Category Description (optional)"
-                                      value={newCategory.description}
-                                      onChange={handleNewCategoryChange}
-                                      className={`w-full mb-3 px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
-                                          isDark
-                                              ? "bg-gray-900 border-gray-700 text-white"
-                                              : "bg-white border-gray-300 text-gray-900"
-                                      }`} />
-                            <button type="button"
-                                    onClick={handleAddCategory}
-                                    className="w-full py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-semibold">
-                                Create Category
+                                className="text-orange-500 font-semibold hover:underline"
+                            >
+                                + {showCategoryForm ? "Cancel New Category" : "Create New Category"}
                             </button>
                         </div>
-                    )}
+
+                        {/* ✅ New category form with parent selector */}
+                        {showCategoryForm && (
+                            <div
+                                className={`p-4 rounded-xl border mt-3 ${
+                                    isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-300"
+                                }`}
+                            >
+                                <input
+                                    type="text"
+                                    name="categoryName"
+                                    placeholder="Category Name"
+                                    value={newCategory.categoryName}
+                                    onChange={handleNewCategoryChange}
+                                    className={`w-full mb-3 px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
+                                        isDark
+                                            ? "bg-gray-900 border-gray-700 text-white"
+                                            : "bg-white border-gray-300 text-gray-900"
+                                    }`}
+                                />
+
+                                <textarea
+                                    name="description"
+                                    rows="2"
+                                    placeholder="Category Description (optional)"
+                                    value={newCategory.description}
+                                    onChange={handleNewCategoryChange}
+                                    className={`w-full mb-3 px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
+                                        isDark
+                                            ? "bg-gray-900 border-gray-700 text-white"
+                                            : "bg-white border-gray-300 text-gray-900"
+                                    }`}
+                                />
+
+                                {/* ✅ Parent category dropdown */}
+                                <div className="relative mb-3" ref={parentDropdownRef}>
+                                    <input
+                                        type="text"
+                                        value={
+                                            newCategory.parentCategoryId
+                                                ? categories.find(
+                                                (c) => c.categoryId === newCategory.parentCategoryId
+                                            )?.categoryName || ""
+                                                : parentSearch
+                                        }
+                                        onChange={handleParentSearch}
+                                        onFocus={() => setIsParentDropdownOpen(true)}
+                                        onClick={() => setIsParentDropdownOpen(!isParentDropdownOpen)}
+                                        placeholder="Select Parent Category (optional)"
+                                        className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:ring-orange-500 outline-none ${
+                                            isDark
+                                                ? "bg-gray-900 border-gray-700 text-white"
+                                                : "bg-white border-gray-300 text-gray-900"
+                                        }`}
+                                    />
+                                    {isParentDropdownOpen && (
+                                        <div
+                                            className={`absolute z-10 w-full mt-2 rounded-xl shadow-lg max-h-56 overflow-y-auto ${
+                                                isDark
+                                                    ? "bg-gray-800 border border-gray-700"
+                                                    : "bg-white border border-gray-300"
+                                            }`}
+                                        >
+                                            {filteredParentCategories.length > 0 ? (
+                                                filteredParentCategories.map((cat) => (
+                                                    <div
+                                                        key={cat.categoryId}
+                                                        onClick={() => {
+                                                            setNewCategory({
+                                                                ...newCategory,
+                                                                parentCategoryId: cat.categoryId,
+                                                            });
+                                                            setParentSearch(cat.categoryName);
+                                                            setIsParentDropdownOpen(false);
+                                                        }}
+                                                        className={`px-4 py-2 cursor-pointer hover:bg-orange-500 hover:text-white ${
+                                                            isDark ? "text-gray-200" : "text-gray-900"
+                                                        }`}
+                                                    >
+                                                        {cat.categoryName}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="px-4 py-2 text-gray-500">No categories found</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="w-full py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-semibold"
+                                >
+                                    Create Category
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     <div className="space-y-5">
                         <div className={dropZoneClass("images")}

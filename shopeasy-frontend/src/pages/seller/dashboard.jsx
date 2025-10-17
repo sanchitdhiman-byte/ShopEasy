@@ -30,6 +30,10 @@ function Dashboard() {
         fetchStats();
     }, []);
 
+    useEffect(() => {
+        console.log("hello")
+    }, )
+
     if (loading) return <p className="text-center mt-10">Loading dashboard stats...</p>;
     if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
 

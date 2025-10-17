@@ -16,6 +16,7 @@ import Categories from "./pages/categories.jsx";
 import Product from "./pages/product.jsx";
 import Category from "./pages/category.jsx";
 import AddProduct from "./pages/seller/addProduct.jsx";
+import EditProduct from "./pages/seller/editProduct.jsx";
 
 function App() {
     return (
@@ -34,6 +35,7 @@ function App() {
                     <Route path="orders" element={<Orders />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="products/add/" element={<AddProduct />} />
+                    <Route path="products/edit/:id" element={<EditProduct />} />
                 </Route>
                 <Route path={"/cart"} element={<Cart />} />
                 <Route path={"/profile"} element={<Profile />} />
