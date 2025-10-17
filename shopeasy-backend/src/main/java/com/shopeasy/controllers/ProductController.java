@@ -34,7 +34,6 @@ public class ProductController {
     private final JwtUtil jwtUtil;
     
     @GetMapping("/")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER', 'BUYER')")
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }

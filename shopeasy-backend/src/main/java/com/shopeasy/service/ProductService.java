@@ -27,7 +27,8 @@ public class ProductService {
     }
     
     public ProductResponseDTO getProductById(String id) {
-        return productRepository.findById(id).map(this::mapToDTO).orElseThrow(() -> new DataNotFoundException("Product not found"));
+        Product product = productRepository.findById(id).orElseThrow(() -> new DataNotFoundException("Product not found"));
+        return mapToDTO(product);
     }
     
     

@@ -54,9 +54,25 @@ public class SellerController {
         return new ResponseEntity<>(sellerService.addProduct(dto, user, images, videos), HttpStatus.CREATED);
     }
     
-    @PutMapping("/{productId}/update")
-    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable String productId, @Valid @RequestBody ProductRequestDTO dto) {
-        return ResponseEntity.ok(sellerService.updateProduct(productId, dto));
+    @PutMapping(value = "/{productId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @PathVariable String productId,
+            @RequestPart("product") @Valid ProductRequestDTO dto,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
+            @RequestPart(value = "newVideos", required = false) List<MultipartFile> newVideos,
+            @RequestParam(value = "removeImageIds", required = false) List<String> removeImageIds,
+            @RequestParam(value = "removeVideoIds", required = false) List<String> removeVideoIds,
+            HttpServletRequest request
+    ) {
+        String header = request.getHeader("Authorization");
+        String token = header.substring(7);
+        String userId = jwtUtil.extractClaim(token, Claims::getSubject);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        
+        return ResponseEntity.ok(
+                sellerService.updateProduct(productId, dto, newImages, newVideos, removeImageIds, removeVideoIds, user)
+        );
     }
     
     @GetMapping("/me/orders")

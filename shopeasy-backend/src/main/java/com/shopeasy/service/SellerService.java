@@ -105,8 +105,22 @@ public class SellerService {
         return mapToDTO(product);
     }
     
-    public ProductResponseDTO updateProduct(String productId, @Valid ProductRequestDTO dto) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new DataNotFoundException("Product not found"));
+    public ProductResponseDTO updateProduct(
+            String productId,
+            @Valid ProductRequestDTO dto,
+            List<MultipartFile> newImages,
+            List<MultipartFile> newVideos,
+            List<String> removeImageIds,
+            List<String> removeVideoIds,
+            User user
+    ) {
+        
+        if (user.getRole() != Role.SELLER) {
+            throw new SecurityException("Only a seller account can update products.");
+        }
+        
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new DataNotFoundException("Product not found"));
         
         product.setProductName(dto.getName());
         product.setDescription(dto.getDescription());
@@ -114,11 +128,41 @@ public class SellerService {
         product.setStockQuantity(dto.getStockQuantity());
         
         if (dto.getCategoryId() != null) {
-            Category category = categoryRepository.findById(dto.getCategoryId()).orElseThrow(() -> new DataNotFoundException("Category not found"));
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new DataNotFoundException("Category not found"));
             product.setCategory(category);
         }
         
-        return mapToDTO(product);
+        if (removeImageIds != null && !removeImageIds.isEmpty()) {
+            product.getImages().removeIf(img -> removeImageIds.contains(img.getImageId()));
+        }
+        
+        if (removeVideoIds != null && !removeVideoIds.isEmpty()) {
+            product.getVideos().removeIf(vid -> removeVideoIds.contains(vid.getVideoId()));
+        }
+        
+        if (newImages != null && !newImages.isEmpty()) {
+            for (MultipartFile file : newImages) {
+                String imageUrl = fileStorageService.saveFile(file, "images");
+                product.getImages().add(ProductImage.builder()
+                        .product(product)
+                        .imageUrl(imageUrl)
+                        .build());
+            }
+        }
+        
+        if (newVideos != null && !newVideos.isEmpty()) {
+            for (MultipartFile file : newVideos) {
+                String videoUrl = fileStorageService.saveFile(file, "videos");
+                product.getVideos().add(ProductVideo.builder()
+                        .product(product)
+                        .videoUrl(videoUrl)
+                        .build());
+            }
+        }
+        
+        Product updated = productRepository.save(product);
+        return mapToDTO(updated);
     }
     
     public List<OrderResponseDTO> getOrdersBySellerId(User user) {
